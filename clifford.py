@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing      import List, Self, Tuple, IO
+from typing      import List, Self, Tuple
 
 
 Scalar = int | float | complex
@@ -21,8 +21,8 @@ class Blade:
         p, q, r      = metric
         self.indices = indices
         self.scalar  = scalar
-        self.metric  = metric
-        self.forms   = [1] * p + [-1] * q + [0] * r
+        self._metric = metric
+        self._forms  = [1] * p + [-1] * q + [0] * r
         self.reduce()
 
     def reduce(self: Self) -> None:
@@ -39,10 +39,10 @@ class Blade:
         while i < len(indices) - 1:
             left  = self.ordinal(indices[i])
             right = self.ordinal(indices[i + 1])
-            if left >= len(self.forms) or right >= len(self.forms):
+            if left >= len(self._forms) or right >= len(self._forms):
                 raise ValueError("Index out of bounds for metric forms")
             if left == right:
-                match self.forms[left]:
+                match self._forms[left]:
                     case 0:
                         self.scalar = 0
                         self.indices = ""
@@ -81,3 +81,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
