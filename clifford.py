@@ -11,11 +11,10 @@ class Blade:
         return ord(index) - ord('1')
 
     def __init__(self: Blade, indices: str, scalar: Scalar, metric: (int, int, int)) -> Blade:
-        for index in indices:
-            if index not in "123456789":
-                raise ValueError(f"Invalid character in indices: '{index}'")
+        if any(i not in "123456789" for i in indices):
+            raise ValueError(f"Invalid character in indices: '{index}'")
 
-        if not all(isinstance(x, int) and x >= 0 for x in metric):
+        if any(not isinstance(m, int) or m <= 0 for m in metric):
             raise ValueError("Metric must be a tuple of non-negative integers")
 
         p, q, r      = metric
