@@ -1,5 +1,5 @@
+from __future__  import annotations
 from dataclasses import dataclass
-from typing      import List, Self, Tuple
 
 
 Scalar = int | float | complex
@@ -10,7 +10,7 @@ class Blade:
     def ordinal(index: str) -> int:
         return ord(index) - ord('1')
 
-    def __init__(self: Self, indices: str, scalar: Scalar, metric: Tuple[int, int, int]) -> Self:
+    def __init__(self: Blade, indices: str, scalar: Scalar, metric: (int, int, int)) -> Blade:
         for index in indices:
             if index not in "123456789":
                 raise ValueError(f"Invalid character in indices: '{index}'")
@@ -25,7 +25,7 @@ class Blade:
         self._forms  = [1] * p + [-1] * q + [0] * r
         self.reduce()
 
-    def reduce(self: Self) -> None:
+    def reduce(self: Blade) -> None:
         # sorts the indices and multiplies the scalar by -1 for each transposition
         indices = list(self.indices)
         for i in range(len(indices)):
@@ -55,7 +55,7 @@ class Blade:
 
         self.indices = "".join(indices)
 
-    def __add__(self: Self, other: Scalar | Self) -> Self:
+    def __add__(self: Blade, other: Scalar | Blade | Cliff) -> Blade:
         if isinstance(other, Scalar):
             pass
         elif isinstance(other, Blade):
@@ -67,7 +67,7 @@ class Blade:
 
 
 class Cliff:
-    def __init__(self: Self, blades: List[Blade], metric: Tuple[int, int, int]) -> Self:
+    def __init__(self: Blade, blades: [Blade], metric: (int, int, int)) -> Blade:
         pass
 
 
