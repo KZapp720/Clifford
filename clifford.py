@@ -1,5 +1,5 @@
+from __future__  import annotations
 from dataclasses import dataclass
-from typing      import List, Self, Tuple
 
 
 Scalar = int | float | complex
@@ -10,12 +10,11 @@ class Blade:
     def ordinal(index: str) -> int:
         return ord(index) - ord('1')
 
-    def __init__(self: Self, indices: str, scalar: Scalar, metric: Tuple[int, int, int]) -> Self:
-        for index in indices:
-            if index not in "123456789":
-                raise ValueError(f"Invalid character in indices: '{index}'")
+    def __init__(self: Blade, indices: str, scalar: Scalar, metric: (int, int, int)) -> Blade:
+        if any(i not in "123456789" for i in indices):
+            raise ValueError(f"Invalid character in indices: '{index}'")
 
-        if not all(isinstance(x, int) and x >= 0 for x in metric):
+        if any(not isinstance(m, int) or m <= 0 for m in metric):
             raise ValueError("Metric must be a tuple of non-negative integers")
 
         p, q, r      = metric
@@ -25,7 +24,7 @@ class Blade:
         self._forms  = [1] * p + [-1] * q + [0] * r
         self.reduce()
 
-    def reduce(self: Self) -> None:
+    def reduce(self: Blade) -> None:
         # sorts the indices and multiplies the scalar by -1 for each transposition
         indices = list(self.indices)
         for i in range(len(indices)):
@@ -55,7 +54,7 @@ class Blade:
 
         self.indices = "".join(indices)
 
-    def __add__(self: Self, other: Scalar | Self) -> Self:
+    def __add__(self: Blade, other: Scalar | Blade | Cliff) -> Blade:
         if isinstance(other, Scalar):
             pass
         elif isinstance(other, Blade):
@@ -67,7 +66,7 @@ class Blade:
 
 
 class Cliff:
-    def __init__(self: Self, blades: List[Blade], metric: Tuple[int, int, int]) -> Self:
+    def __init__(self: Blade, blades: [Blade], metric: (int, int, int)) -> Blade:
         pass
 
 
