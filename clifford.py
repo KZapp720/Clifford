@@ -10,12 +10,15 @@ class Blade:
         return ord(index) - ord('1')
 
     def __init__(self: Blade, indices: str, scalar: Scalar, metric: Tuple[int, int, int]) -> None:
-        if any(i not in "123456789" for i in indices):
-            raise ValueError(f"Invalid character in indices")
+        if any((index := i) not in "123456789" for i in indices):
+            raise ValueError(f"Invalid index passed to Blade constructor: '{index}'")
 
-        if any(not isinstance(m, int) or m <= 0 for m in metric):
-            raise ValueError("Metric must be a tuple of non-negative integers")
-
+        if any(not isinstance(m, int) or m < 0 for m in metric):
+            raise ValueError(f"Metric must be a tuple of non-negative integers: {metric}")
+        
+        if sum(metric) > 9:
+            raise ValueError("Metric cannot exceed 9 dimensions")
+        
         p, q, r      = metric
         self.indices = indices
         self.scalar  = scalar
@@ -31,6 +34,14 @@ class Blade:
                 if self.ordinal(indices[j]) > self.ordinal(indices[j + 1]):
                     indices[j], indices[j + 1] = indices[j + 1], indices[j]
                     self.scalar *= -1
+
+        # edge cases for the while loop below
+        if len(self._forms) == 0 and self.indices != "":
+            raise ValueError("Index out of bounds for metric forms")
+        if len(self._forms) == 1 and self.indices not in ("", "1"):
+            raise ValueError("Index out of bounds for metric forms")
+        if len(self.indices) == 1 and int(self.indices) > len(self._forms):
+            raise ValueError("Index out of bounds for metric forms")
 
         # reduces quadratic forms to their metric
         i = 0
@@ -107,6 +118,8 @@ def clifford(p: int, q: int, r: int) -> None:
 
 def main() -> None:
     print("Hello World")
+    x = Blade("2", 1, (1, 0, 0))
+    print(x)
 
 
 if __name__ == "__main__":
