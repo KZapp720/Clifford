@@ -82,7 +82,7 @@ class Blade:
 
 
 class Cliff:
-    def __init__(self: Cliff, blades: Cliff | List[Blade] | Blade | Scalar, metric: Tuple[int, int, int] | None = None) -> None:
+    def __init__(self: Cliff, blades: Cliff | List[Blade] | List[str] | Blade | str | Scalar, metric: Tuple[int, int, int] | None = None) -> None:
         match (blades, metric):
             case (cliff, None)       if isinstance(cliff, Cliff):
                 self.blades  = cliff.blades
@@ -92,22 +92,30 @@ class Cliff:
                     raise ValueError(f"Mismatched metric signature passed to Cliff initializer: {cliff._metric} ≠ ({p}, {q}, {r})")
                 self.blades  = cliff.blades
                 self._metric = cliff._metric
-            case ([], None):
+            case (xs, None)          if isinstance(xs, List[Blade]):
                 pass
-            case ([], (p, q, r))     if p >= 0 and q >= 0 and r >= 0:
+            case (xs, (p, q, r))     if isinstance(xs, List[Blade]) and p >= 0 and q >= 0 and r >= 0:
                 pass
-            case (xs, None)          if isinstance(xs, list):
+            case (xs, None)          if isinstance(xs, List[str]):
                 pass
-            case (xs, (p, q, r))     if isinstance(xs, list) and p >= 0 and q >= 0 and r >= 0:
+            case (xs, (p, q, r))     if isinstance(xs, List[str]) and p >= 0 and q >= 0 and r >= 0:
                 pass
             case (x, None)           if isinstance(x, Blade):
                 pass
             case (x, (p, q, r))      if isinstance(x, Blade) and p >= 0 and q >= 0 and r >= 0:
                 pass
+            case (x, None)           if isinstance(x, str):
+                raise ValueError
+            case (x, (p, q, r))      if isinstance(x, str) and p >= 0 and q >= 0 and r >= 0:
+                unit         = Blade(blades, 1, metric)
+                self.blades  = [unit]
+                self._metric = metric
             case (x, None)           if isinstance(x, Scalar):
-                pass
+                raise ValueError
             case (x, (p, q, r))      if isinstance(x, Scalar) and p >= 0 and q >= 0 and r >= 0:
-                pass
+                unit         = Blade("", blades, metric)
+                self.blades  = [unit]
+                self._metric = metric
             case _:
                 pass
 
@@ -116,12 +124,10 @@ def clifford(p: int, q: int, r: int) -> None:
     pass
 
 
-def main() -> None:
-    print("Hello World")
-    x = Blade("2", 1, (1, 0, 0))
-    print(x)
+def multivectors_test() -> None:
+    print("multivectors.py test!")
 
 
 if __name__ == "__main__":
-    main()
+    multivectors_test()
 
