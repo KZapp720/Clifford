@@ -142,19 +142,20 @@ class Cliff:
             case _:
                 raise ValueError("Invalid input combination for Cliff initialization")
 
-            self.reduce()
+        self.reduce()
 
-        def reduce(self: Cliff) -> None:
-            blade_dict = {}
+    def reduce(self: Cliff) -> None:
+        blade_dict = {}
 
-            for blade in self.blades:
-                key = blade.indices
-                if key in blade_dict:
-                    blade_dict[key].scalar += blade.scalar
-                else:
-                    blade_dict[key] = Blade(blade.indices, blade.scalar, blade._metric)
+        for blade in self.blades:
+            key = blade.indices
+            if key in blade_dict:
+                blade_dict[key].scalar += blade.scalar
+            else:
+                blade_dict[key] = Blade(blade.indices, blade.scalar, blade._metric)
 
-            self.blades = [blade for blade in blade_dict.values() if blade.scalar != 0]
+        self.blades = [blade for blade in blade_dict.values() if blade.scalar != 0]
+        self.blades.sort(key = lambda blade : (len(blade.indices), blade.indices))
 
 
 def clifford(p: int, q: int, r: int) -> None:
