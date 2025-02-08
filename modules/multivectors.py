@@ -1,7 +1,6 @@
 from __future__  import annotations
 from typing      import List, Tuple
 
-
 Scalar = int | float | complex
 
 
@@ -16,10 +15,10 @@ class Blade:
 
         if any(not isinstance(m, int) or m < 0 for m in metric):
             raise ValueError(f"Metric must be a tuple of non-negative integers: {metric}")
-
+        
         if sum(metric) > 9:
             raise ValueError("Metric cannot exceed 9 dimensions")
-
+        
         p, q, r      = metric
         self.indices = indices
         self.scalar  = scalar
@@ -65,22 +64,19 @@ class Blade:
 
         self.indices = "".join(indices)
 
-    def __add__(self: Blade, other: Scalar | Blade | Cliff) -> Blade:
+    def __add__(self: Blade, other: Scalar | Blade | Cliff) -> Blade | Cliff:
         if isinstance(other, Scalar):
             return self # TODO returns a Cliff
-
         elif isinstance(other, Blade):
             if self._metric != other._metric:
               raise ValueError("Cannot add Blades with different metric signatures")
             if self.indices != other.indices:
               return self # TODO returns a Cliff
             return Blade(self.indices, self.scalar + other.scalar, self._metric)
-
         elif isinstance(other, Cliff):
             if self._metric != other._metric:
               raise ValueError("Cannot add Blade and Cliff with different metric signatures")
             return self # TODO returns a Cliff
-
         else:
             raise ValueError(f"Blade class does not support addition with type {type(other)}")
 
@@ -146,19 +142,7 @@ class Cliff:
             case _:
                 raise ValueError("Invalid input combination for Cliff initialization")
 
-            self.reduce()
-
-    def reduce(self: Cliff) -> None:
-        blade_dict = {}
-
-        for blade in self.blades:
-            key = blade.indices
-            if key in blade_dict:
-                blade_dict[key].scalar += blade.scalar
-            else:
-                blade_dict[key] = Blade(blade.indices, blade.scalar, blade._metric)
-
-        self.blades = [blade for blade in blade_dict.values() if blade.scalar != 0]
+            # reduce duplicate blades in self.blades
 
 
 def clifford(p: int, q: int, r: int) -> None:
