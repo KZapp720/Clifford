@@ -64,6 +64,49 @@ class Blade:
 
         self.indices = "".join(indices)
 
+    def __str__(self: Blade) -> str:
+        output = ""
+
+        match complex(self.scalar):
+            case complex(real = 0, imag = 0):
+                output =  "0"
+            case complex(real = 0, imag = 1):
+                output =  "j" if self.indices == "" else f"jE{self.indices}"
+            case complex(real = 0, imag = -1):
+                output =  "-j" if self.indices == "" else f"-jE{self.indices}"
+            case complex(real = 0, imag = b):
+                try:
+                    B = int(b)
+                except:
+                    B = b
+                output =  f"{B}j" if self.indices == "" else f"{B}jE{self.indices}"
+            case complex(real = 1, imag = 0):
+                output =  "1" if self.indices == "" else f"E{self.indices}"            
+            case complex(real = a, imag = 0):
+                try:
+                    A = int(a)
+                except:
+                    A = a
+                output =  f"{A}" if self.indices == "" else f"{A}E{self.indices}"
+            case complex(real = a, imag = 1):
+                try:
+                    A = int(a)
+                except:
+                    A = a
+                output =  f"({A} + j)" if self.indices == "" else f"({A} + j)E{self.indices}"
+            case complex(real = a, imag = b):
+                try:
+                    A = int(a)
+                except:
+                    A = a
+                try:
+                    B = int(b)
+                except:
+                    B = b
+                output =  f"({A} + {B}j)" if self.indices == "" else f"({A} + {B}j)E{self.indices}"
+
+        return output.replace("+ -", "- ")
+
     def __add__(self: Blade, other: Scalar | Blade | Cliff) -> Blade | Cliff:
         if isinstance(other, Scalar):
             return self # TODO returns a Cliff
@@ -142,27 +185,57 @@ class Cliff:
             case _:
                 raise ValueError("Invalid input combination for Cliff initialization")
 
-            self.reduce()
+        self.reduce()
 
-        def reduce(self: Cliff) -> None:
-            blade_dict = {}
+    def reduce(self: Cliff) -> None:
+        blade_dict = {}
 
-            for blade in self.blades:
-                key = blade.indices
-                if key in blade_dict:
-                    blade_dict[key].scalar += blade.scalar
-                else:
-                    blade_dict[key] = Blade(blade.indices, blade.scalar, blade._metric)
+        for blade in self.blades:
+            key = blade.indices
+            if key in blade_dict:
+                blade_dict[key].scalar += blade.scalar
+            else:
+                blade_dict[key] = Blade(blade.indices, blade.scalar, blade._metric)
 
-            self.blades = [blade for blade in blade_dict.values() if blade.scalar != 0]
+        self.blades = [blade for blade in blade_dict.values() if blade.scalar != 0]
+        self.blades.sort(key = lambda blade : (len(blade.indices), blade.indices))
 
+    def __str__(self: Cliff) -> str:
+        output           = ""
+        formatted_scalar = ""
+
+        for blade in self.blades:
+            match blade.scalar:
+                case 1 | 1.0:
+                    formatted_scalar = ""
+                case 0 + 1j:
+                    formatted_scalar = "j"
+                case complex(real=0, imag=1):
+                    formatted_scalar = "j"
+                case complex(real=0, imag=_) if scalar.imag != 0:
+                    formatted_scalar = f"{scalar.imag}j"
+                case complex(real=_, imag=1):
+                    formatted_scalar = f"{scalar.real} + j"
+                case complex(real=_, imag=_):
+                    formatted_scalar = f"{scalar.real} + {scalar.imag}j"
+                case _:
+                    formatted_scalar = str(scalar)
+
+            if blade.indices == "":
+                output += f"{formatted_scalar} + "
+            else:
+                output += f"{formatted_scalar}E{blade.indices} + "
+
+        output.replace("+ -", "-")
+        return output[:-2] if output != "" else "0"
 
 def clifford(p: int, q: int, r: int) -> None:
     pass
 
 
 def multivectors_test() -> None:
-    print("multivectors.py test!")
+    example = Blade("", -10.5j, (3, 0, 0))
+    print(example)
 
 
 if __name__ == "__main__":
